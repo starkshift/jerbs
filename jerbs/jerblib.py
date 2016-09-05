@@ -33,3 +33,83 @@ class JobScraper(object):
                         #doc = nlp(span.text)
                         #for np in doc.noun_chunks:
                         #    np.text
+
+def NullSpider(url):
+    yield url
+
+def DullSpider(url):
+    yield url + 'dull'
+
+def BrassRingSpider(self):
+    # we need to get the cookies from this "base url" to make subsequent queries
+    self.parmdata['baseurl'] = "%s/searchopenings.aspx?partnerid=%s&siteid=%s"%(self.parmdata['site'],self.parmdata['partnerid'],self.parmdata['siteid'])
+    baser = requests.get(self.parmdata['baseurl'])
+    self.cookies = baser.cookies
+
+    # identify the url for performing search queries
+    searchpage = dict()
+    soup = BeautifulSoup(baser.text,"lxml")
+    search = soup.find_all('form',attrs={'id' : 'aspnetForm'})
+
+    # loop over search result pages; each page contains 50 listings by default
+    startrecord = 1
+    while True:
+        searchpage['url'] = "%s/%s"%(self.parmdata['site'],search[0]['action'])
+        headers = {'recordstart':startrecord}
+        searchpage['data'] = requests.post(searchpage['url'],cookies=baser.cookies,data=headers)
+        searchpage['soup'] = BeautifulSoup(unicode(searchpage['data'].text),"lxml")
+        for maincontent in searchpage['soup'].find_all('input',attrs={'id':'ctl00_MainContent_GridFormatter_json_tabledata'}):
+            if maincontent.has_attr('id'):
+                subsoup = BeautifulSoup(maincontent['value'],"lxml")
+                for job in subsoup.find_all('input',attrs={'name':'chkJobClientIds'}):
+                    jobid = job['id']
+                    joburl = "%s/jobdetails.aspx?jobId=%s&JobSiteId=%s"%(self.parmdata['site'],jobid,self.parmdata['siteid'])
+                    yield joburl
+
+        numjobs = int(searchpage['soup'].find('input',{'name':'totalrecords'})['value'])
+        if startrecord == 1:
+            bar = tqdm_notebook(total=numjobs)
+        bar.update(50)
+        if startrecord + 50 >= numjobs:
+            break
+        else:
+            startrecord = startrecord + 50def NullSpider(url):
+    yield url
+
+def DullSpider(url):
+    yield url + 'dull'
+
+def BrassRingSpider(self):
+    # we need to get the cookies from this "base url" to make subsequent queries
+    self.parmdata['baseurl'] = "%s/searchopenings.aspx?partnerid=%s&siteid=%s"%(self.parmdata['site'],self.parmdata['partnerid'],self.parmdata['siteid'])
+    baser = requests.get(self.parmdata['baseurl'])
+    self.cookies = baser.cookies
+
+    # identify the url for performing search queries
+    searchpage = dict()
+    soup = BeautifulSoup(baser.text,"lxml")
+    search = soup.find_all('form',attrs={'id' : 'aspnetForm'})
+
+    # loop over search result pages; each page contains 50 listings by default
+    startrecord = 1
+    while True:
+        searchpage['url'] = "%s/%s"%(self.parmdata['site'],search[0]['action'])
+        headers = {'recordstart':startrecord}
+        searchpage['data'] = requests.post(searchpage['url'],cookies=baser.cookies,data=headers)
+        searchpage['soup'] = BeautifulSoup(unicode(searchpage['data'].text),"lxml")
+        for maincontent in searchpage['soup'].find_all('input',attrs={'id':'ctl00_MainContent_GridFormatter_json_tabledata'}):
+            if maincontent.has_attr('id'):
+                subsoup = BeautifulSoup(maincontent['value'],"lxml")
+                for job in subsoup.find_all('input',attrs={'name':'chkJobClientIds'}):
+                    jobid = job['id']
+                    joburl = "%s/jobdetails.aspx?jobId=%s&JobSiteId=%s"%(self.parmdata['site'],jobid,self.parmdata['siteid'])
+                    yield joburl
+
+        numjobs = int(searchpage['soup'].find('input',{'name':'totalrecords'})['value'])
+        if startrecord == 1:
+            bar = tqdm_notebook(total=numjobs)
+        bar.update(50)
+        if startrecord + 50 >= numjobs:
+            break
+        else:
+            startrecord = startrecord + 50
