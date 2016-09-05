@@ -73,7 +73,9 @@ def BrassRingSpider(self):
         if startrecord + 50 >= numjobs:
             break
         else:
-            startrecord = startrecord + 50def NullSpider(url):
+            startrecord = startrecord + 50
+
+def NullSpider(url):
     yield url
 
 def DullSpider(url):
