@@ -1,3 +1,11 @@
+NAME = "jerbs"
+VERSION = "0.0.1 ALPHA"
+DESCRIPTION = """A Python package to help figure out if they took our jerbs."""
+AUTHOR = "Russell Miller"
+AUTHOR_EMAIL = ""
+URL = "https://github.com/starkshift/jerbs"
+LICENSE = "Apache License"
+
 from bs4 import BeautifulSoup
 import requests
 from spacy.en import English
